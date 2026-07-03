@@ -314,7 +314,6 @@ function render(){
           ${[["votes","📝 Votes"],["board","🏆 Leaderboard"]].map(([k,l])=>`<button onclick="setView('${k}')" style="flex:1;padding:9px 4px;border:none;border-radius:9px;background:${S.view===k?C.green:"transparent"};color:${S.view===k?"#fff":C.muted};font-weight:700;font-size:11px">${l}</button>`).join("")}
         </div>
         <button onclick="${isGM?`isGM=false;render()`:`gmLogin()`}" style="padding:9px 11px;background:${isGM?"rgba(0,187,68,0.15)":C.dark};border:1px solid ${isGM?C.green:C.border};border-radius:10px;color:${isGM?C.green:C.muted};font-size:13px;font-weight:700;flex-shrink:0">${isGM?"🔓 GM":"🔐"}</button>
-        <button onclick="renderBackup()" style="padding:9px 11px;background:${C.dark};border:1px solid ${C.border};border-radius:10px;color:${C.gold};font-size:15px;flex-shrink:0">💾</button>
         <button onclick="renderHelp()" style="padding:9px 11px;background:${C.dark};border:1px solid ${C.border};border-radius:10px;color:${C.muted};font-size:15px;flex-shrink:0">❓</button>
       </div>
       ${S.view==="votes"?renderVotes(dayMatches,match):renderBoard(lb,hasResults)}
@@ -419,7 +418,6 @@ function renderBoard(lb,hasResults){
         ${[["🎯","Exact","5pts"],["✅","Winner","3pts"],["🤝","Draw","3pts"],["⭐","Scorer","4pts"]].map(([ic,l,pt])=>`<div style="text-align:center"><div style="font-size:13px">${ic}</div><div style="font-size:8px;color:${C.muted}">${l}</div><div style="font-size:9px;font-weight:800;color:${C.gold}">${pt}</div></div>`).join("")}
       </div>
     </div>
-    <button onclick="showFullscreen()" style="width:100%;padding:14px 0;margin-bottom:10px;background:linear-gradient(135deg,${C.green},${C.dkGreen});border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:800">📸 Full screen — take screenshot</button>
     <button onclick="setView('votes')" style="width:100%;padding:11px 0;background:transparent;border:1px solid ${C.border};border-radius:12px;color:${C.muted};font-size:13px">← Back to votes</button>`;
 }
 
