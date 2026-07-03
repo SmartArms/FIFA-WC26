@@ -192,8 +192,9 @@ MATCHES.forEach(m=>{
   const offset=m.time.includes("CST")?6:5;
   const kickoff=Date.UTC(2026,months[dp[1]],parseInt(dp[2]),hr+offset,min);
   const delay=kickoff-Date.now();
-  if(delay>0)setTimeout(()=>{if(pendingCloudSave)pushCloud(true);},delay);
+  if(delay>0)setTimeout(()=>{render();if(pendingCloudSave)pushCloud(true);},delay);
 });
+setInterval(render,60000);
 
 function applyCloud(d){
   if(!d)return;
@@ -249,7 +250,7 @@ function filterScorerDropdown(el){
   dd.innerHTML=matches.map(p=>`<div onmousedown="pickScorer('${p.replace(/'/g,"\\'")}','${_ddMid}',${_ddPi})"ontouchstart="pickScorer('${p.replace(/'/g,"\\'")}','${_ddMid}',${_ddPi})">${p}</div>`).join("");
 }
 function pickScorer(name,mid,pi){
-  setBonus(mid,pi,name);
+  setBonus(mid,pi,name);sv(true);
   const inputs=document.querySelectorAll(`input[data-bonus="${mid}-${pi}"]`);
   inputs.forEach(el=>el.value=name);
   _dd().style.display="none";
@@ -574,7 +575,7 @@ function handleScoreInput(mid,pi,el){
   const v=el.value;
   const valid=!v||!!parseScore(v);
   el.style.borderColor=valid?C.border:"#ff6644";
-  if(valid){if(!S.votes[mid])S.votes[mid]={};S.votes[mid][pi]=v;sv();ping();}
+  if(valid){if(!S.votes[mid])S.votes[mid]={};S.votes[mid][pi]=v;sv(true);ping();}
 }
 function validateScoreBlur(mid,pi,el){
   const v=el.value.trim();
@@ -587,7 +588,7 @@ function validateScoreBlur(mid,pi,el){
 }
 function setVote(mid,pi,v){if(!S.votes[mid])S.votes[mid]={};S.votes[mid][pi]=v;sv();ping();}
 function setBonus(mid,pi,v){if(!S.bonus[mid])S.bonus[mid]={};S.bonus[mid][pi]=v;sv();ping();}
-function setSoVote(mid,pi,v){if(!S.soVotes[mid])S.soVotes[mid]={};S.soVotes[mid][pi]=v;sv();ping();render();}
+function setSoVote(mid,pi,v){if(!S.soVotes[mid])S.soVotes[mid]={};S.soVotes[mid][pi]=v;sv(true);ping();render();}
 function setResult(mid,v){S.results[mid]=v;sv(true);ping();debouncedRender();}
 function setScorer(mid,v){S.scorers[mid]=v;sv(true);ping();debouncedRender();}
 function setShootout(mid,v){S.shootouts[mid]=v;sv(true);ping();render();}
