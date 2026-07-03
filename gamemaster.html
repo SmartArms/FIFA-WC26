@@ -128,7 +128,12 @@ function applyCloud(d){
 async function syncCloud(){
   try{
     const r=await fetch(BIN_URL+"/latest",{headers:{"X-Access-Key":API_KEY}});
-    const j=await r.json();applyCloud(j.record);render();
+    const j=await r.json();
+    const d=j.record;
+    const cloudHasData=d&&(d.players||[]).some(p=>p.trim())||(Object.keys(d?.results||{}).length>0);
+    if(cloudHasData){applyCloud(d);}
+    else{sv();}// cloud empty — push local data up
+    render();
   }catch(e){}
 }
 
