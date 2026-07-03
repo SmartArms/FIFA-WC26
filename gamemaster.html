@@ -594,6 +594,8 @@ function setScorer(mid,v){S.scorers[mid]=v;sv(true);ping();debouncedRender();}
 function setShootout(mid,v){S.shootouts[mid]=v;sv(true);ping();render();}
 
 render();
+// Re-render when iOS Safari restores page from BFCache (back/forward navigation or tab reopen)
+window.addEventListener("pageshow", e => { if(e.persisted) render(); });
 </script>
 </body>
 </html>
