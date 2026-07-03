@@ -169,12 +169,21 @@ function sv(cloudNow){
 // Push on page exit
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&pendingCloudSave)pushCloud(true);});
 window.addEventListener("beforeunload",()=>{if(pendingCloudSave)pushCloud(true);});
-// Push when match starts (check every minute)
-setInterval(()=>{
-  if(!pendingCloudSave)return;
-  const started=MATCHES.filter(m=>matchStarted(m)&&!S.results[m.id]);
-  if(started.length)pushCloud(true);
-},60000);
+// Schedule a one-time push at each match's kick-off time
+MATCHES.forEach(m=>{
+  if(S.results[m.id]||!m.time||m.time==="TBD")return;
+  const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  const dp=m.day.split(" ");
+  const tp=m.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if(!tp)return;
+  let hr=parseInt(tp[1]),min=parseInt(tp[2]);
+  if(tp[3].toUpperCase()==="PM"&&hr!==12)hr+=12;
+  if(tp[3].toUpperCase()==="AM"&&hr===12)hr=0;
+  const offset=m.time.includes("CST")?6:5;
+  const kickoff=Date.UTC(2026,months[dp[1]],parseInt(dp[2]),hr+offset,min);
+  const delay=kickoff-Date.now();
+  if(delay>0)setTimeout(()=>{if(pendingCloudSave)pushCloud(true);},delay);
+});
 
 function applyCloud(d){
   if(!d)return;
