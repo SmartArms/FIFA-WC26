@@ -140,6 +140,16 @@ async function syncCloud(){
 // Load from cloud on startup, then poll every 30s
 syncCloud();
 setInterval(syncCloud,30000);
+
+const GM_PIN="6963";
+let isGM=false;
+function gmLogin(){
+  const pin=prompt("Enter GM PIN:");
+  if(pin===GM_PIN){isGM=true;render();alert("✅ GM Mode active!");}
+  else if(pin!==null){alert("❌ Wrong PIN");}
+}
+function gmGuard(fn){return isGM?fn():gmLogin();}
+
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
 function parseScore(s){
@@ -276,6 +286,7 @@ function render(){
         <div style="flex:1;display:flex;background:${C.dark};border-radius:12px;padding:4px;border:1px solid ${C.border};gap:4px">
           ${[["votes","📝 Votes"],["board","🏆 Leaderboard"]].map(([k,l])=>`<button onclick="setView('${k}')" style="flex:1;padding:9px 4px;border:none;border-radius:9px;background:${S.view===k?C.green:"transparent"};color:${S.view===k?"#fff":C.muted};font-weight:700;font-size:11px">${l}</button>`).join("")}
         </div>
+        <button onclick="${isGM?`isGM=false;render()`:`gmLogin()`}" style="padding:9px 11px;background:${isGM?"rgba(0,187,68,0.15)":C.dark};border:1px solid ${isGM?C.green:C.border};border-radius:10px;color:${isGM?C.green:C.muted};font-size:13px;font-weight:700;flex-shrink:0">${isGM?"🔓 GM":"🔐"}</button>
         <button onclick="renderBackup()" style="padding:9px 11px;background:${C.dark};border:1px solid ${C.border};border-radius:10px;color:${C.gold};font-size:15px;flex-shrink:0">💾</button>
         <button onclick="renderHelp()" style="padding:9px 11px;background:${C.dark};border:1px solid ${C.border};border-radius:10px;color:${C.muted};font-size:15px;flex-shrink:0">❓</button>
       </div>
@@ -290,9 +301,9 @@ function renderVotes(dayMatches,match){
     <div style="margin-bottom:14px">
       <div style="font-size:10px;color:${C.muted};text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px">Players (saved automatically)</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${players.map((p,i)=>`<input value="${esc(p)}" placeholder="Player ${i+1}" oninput="setPlayer(${i},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>`).join("")}
+        ${players.map((p,i)=>isGM?`<input value="${esc(p)}" placeholder="Player ${i+1}" oninput="setPlayer(${i},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>`:`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px">${esc(p)||`Player ${i+1}`}</div>`).join("")}
       </div>
-      <button onclick="addPlayer()" style="margin-top:8px;padding:8px 0;width:100%;background:transparent;border:1px dashed ${C.border};border-radius:9px;color:${C.muted};font-size:12px">+ Add player</button>
+      ${isGM?`<button onclick="addPlayer()" style="margin-top:8px;padding:8px 0;width:100%;background:transparent;border:1px dashed ${C.border};border-radius:9px;color:${C.muted};font-size:12px">+ Add player</button>`:""}
     </div>
     <div style="margin-bottom:14px">
       <div style="font-size:10px;color:${C.muted};text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px">Pick a match</div>
@@ -322,10 +333,10 @@ function renderMatchCard(m,players_){
       <div style="padding:11px 13px;background:#071520">
         <div style="font-size:10px;color:${C.gold};text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px">✅ GM enters after match</div>
         <div style="display:flex;gap:8px;margin-bottom:8px">
-          <input value="${esc(res)}" placeholder="Final score e.g. 2-1" oninput="setResult('${m.id}',this.value)" style="flex:1;padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px"/>
-          <input value="${esc(scorer)}" placeholder="⭐ First scorer" oninput="setScorer('${m.id}',this.value)" style="flex:1.5;padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px"/>
+          ${isGM?`<input value="${esc(res)}" placeholder="Final score e.g. 2-1" oninput="setResult('${m.id}',this.value)" style="flex:1;padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px"/>`:`<div style="flex:1;padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${res?C.text:C.muted};font-size:13px">${res||"Awaiting result"}</div>`}
+          ${isGM?`<input value="${esc(scorer)}" placeholder="⭐ First scorer" oninput="setScorer('${m.id}',this.value)" style="flex:1.5;padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px"/>`:`<div style="flex:1.5;padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${scorer?C.text:C.muted};font-size:13px">${scorer||"⭐ First scorer"}</div>`}
         </div>
-        ${isDraw?`<div style="font-size:10px;color:${C.gold};text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px">🥅 Penalty shootout winner</div><div style="display:flex;gap:8px"><button onclick="setShootout('${m.id}','h')" style="flex:1;padding:9px 0;border-radius:9px;border:${so==="h"?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${so==="h"?C.green:C.dark};color:${so==="h"?"#fff":C.muted};font-size:12px;font-weight:700">${m.hf} ${esc(m.home)}</button><button onclick="setShootout('${m.id}','a')" style="flex:1;padding:9px 0;border-radius:9px;border:${so==="a"?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${so==="a"?C.green:C.dark};color:${so==="a"?"#fff":C.muted};font-size:12px;font-weight:700">${m.af} ${esc(m.away)}</button></div>`:""}
+        ${isDraw&&isGM?`<div style="font-size:10px;color:${C.gold};text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px">🥅 Penalty shootout winner</div><div style="display:flex;gap:8px"><button onclick="setShootout('${m.id}','h')" style="flex:1;padding:9px 0;border-radius:9px;border:${so==="h"?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${so==="h"?C.green:C.dark};color:${so==="h"?"#fff":C.muted};font-size:12px;font-weight:700">${m.hf} ${esc(m.home)}</button><button onclick="setShootout('${m.id}','a')" style="flex:1;padding:9px 0;border-radius:9px;border:${so==="a"?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${so==="a"?C.green:C.dark};color:${so==="a"?"#fff":C.muted};font-size:12px;font-weight:700">${m.af} ${esc(m.away)}</button></div>`:""}
       </div>
     </div>
     <div style="font-size:10px;color:${C.muted};text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px">Predictions</div>
