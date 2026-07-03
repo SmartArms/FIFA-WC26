@@ -86,6 +86,47 @@ const MATCHES = [
 ];
 const DAYS = [...new Set(MATCHES.map(m=>m.day))];
 const MEDAL = ["🥇","🥈","🥉"];
+
+const SQUADS = {
+  "Brazil":      ["Alisson","Éderson","Weverton","Danilo","Militão","Marquinhos","Gabriel Magalhães","Wendell","Yan Couto","Guilherme Arana","Casemiro","Bruno Guimarães","Gerson","Lucas Paquetá","Rodrygo","Raphinha","Vinicius Jr","Gabriel Martinelli","Endrick","Pedro","Gabriel Barbosa","Savinho"],
+  "Japan":       ["Gonda","Osaka","Suzuki","Taniguchi","Itakura","Yoshida","Sakai","Nagatomo","Endo","Morita","Kamada","Tanaka","Kubo","Doan","Mitoma","Ito","Maeda","Ueda","Furuhashi","Nakamura"],
+  "Germany":     ["Neuer","ter Stegen","Trapp","Rüdiger","Schlotterbeck","Tah","Süle","Kimmich","Goretzka","Kroos","Gündogan","Havertz","Müller","Gnabry","Sané","Wirtz","Musiala","Brandt","Füllkrug","Werner","Adeyemi"],
+  "Paraguay":    ["Gatito Fernández","Villar","Alonso","Balbuena","Gustavo Gómez","Alderete","Rojas","Arzamendia","Villasanti","Cubas","Ramírez","Almirón","Sanabria","Enciso","Bareiro","Romero","Duarte","Pitta"],
+  "Netherlands": ["Flekken","Bijlow","Verbruggen","Van Dijk","De Ligt","Timber","Blind","Dumfries","Ake","Geertruida","De Jong","Schouten","Simons","Gakpo","Depay","Weghorst","Malen","Brobbey","Bergwijn","Zirkzee","Wieffer"],
+  "Morocco":     ["Bono","Munir","Bounou","Hakimi","Mazraoui","Saïss","Aguerd","Attiyat Allah","El Yamiq","Amrabat","Amallah","Ounahi","Ziyech","En-Nesyri","Sabiri","Boufal","Cheddira","Aboukhlal","Dari"],
+  "Ivory Coast": ["Sangaré","Fofana","Badé","Deli","Aurier","Koné","Seri","Zaha","Pépé","Haller","Gradel","Traoré","Diallo","Bamba","Boga","Konaté","Coulibaly"],
+  "Norway":      ["Nyland","Ørjan Nyland","Haaland","Ødegaard","King","Solbakken","Nusa","Berge","Thorstvedt","Ajer","Ostigard","Pedersen","Johansen","Elyounoussi","Botheim","Bobb","Haaland Erling"],
+  "France":      ["Lloris","Maignan","Areola","Pavard","Hernandez","Varane","Upamecano","Konaté","Digne","Coman","Tchouaméni","Camavinga","Guendouzi","Rabiot","Griezmann","Mbappé","Dembélé","Giroud","Thuram","Saliba","Kolo Muani","Nkunku"],
+  "Sweden":      ["Olsen","Lindelöf","Danielson","Augustinsson","Krafth","Ekdal","Svanberg","Forsberg","Kulusevski","Isak","Berg","Claesson","Elanga","Gyökeres","Karlsson","Cajuste"],
+  "Mexico":      ["Ochoa","Mier","Galindo","Moreno","Montes","Arteaga","Angulo","Álvarez","Herrera","Rodríguez","Guardado","Martín","Lozano","Jiménez","Vega","Corona","Antuna","Lainez","Martín Jesús"],
+  "Ecuador":     ["Domínguez","Preciado","Hincapié","Torres","Porozo","Arboleda","Estupiñán","Caicedo","Gruezo","Sarmiento","Plata","Valencia","Ibarra","Cifuentes","Campana","Cabezas","Enner Valencia"],
+  "England":     ["Pickford","Ramsdale","Pope","Alexander-Arnold","Trippier","Maguire","Stones","Dier","Shaw","Chilwell","Henderson","Bellingham","Rice","Phillips","Saka","Sterling","Rashford","Foden","Kane","Mount","Grealish","Toney"],
+  "Congo DR":    ["Mpasi","Mbemba","Kayembe","Luyindama","Mbenza","Muleka","Bongonda","Masuaku","Tshibola","Bakambu","Nsimba","Kibonge","Cipenga"],
+  "Belgium":     ["Courtois","Mignolet","Casteels","Alderweireld","Vertonghen","Tielemans","De Bruyne","Witsel","Carrasco","Hazard","Lukaku","Trossard","Doku","Openda","Mertens","Onana","Theate","Castagne"],
+  "Senegal":     ["Mendy","Gana Gueye","Kouyaté","Badji","Diallo","Cissé","Sabaly","Jakobs","Diatta","Mané","Sarr","Diedhiou","Jackson","Dieng","Bamba Dieng","Nampalys","Diarra"],
+  "USA":         ["Turner","Steffen","Horvath","Dest","Robinson","Ream","Richards","Zimmerman","McKennie","Adams","Musah","Reyna","Pulisic","Weah","Balogun","Ferreira","Wright","Pepi","Sargent","Morris"],
+  "Bosnia":      ["Sehic","Kovacevic","Bicakcic","Sanicanin","Kolasinac","Civic","Hadziahmetovic","Krunic","Pjanic","Visca","Dzeko","Prevljak","Gigovic","Rahmanovic"],
+  "Spain":       ["Unai Simón","Raya","Carvajal","Laporte","Pau Torres","Nacho","Alba","Rodri","Pedri","Gavi","Busquets","Asensio","Yamal","Ferran Torres","Morata","Oyarzabal","Baena","Williams","Joselu","Olmo","Zubimendi"],
+  "Austria":     ["Pentz","Lindner","Alaba","Hinteregger","Dragovic","Lainer","Lazaro","Baumgartner","Sabitzer","Grillitsch","Schlager","Arnautovic","Gregoritsch","Onisiwo","Kainz","Wimmer"],
+  "Portugal":    ["Rui Patrício","Costa","Diogo Dalot","Semedo","Pepe","Dias","Guerreiro","Cancelo","Danilo","Bruno Fernandes","Vitinha","Moutinho","Palhinha","William Carvalho","Ronaldo","Leão","Felix","Horta","Trincão","Jota","André Silva"],
+  "Croatia":     ["Livakovic","Gvardiol","Lovren","Caleta-Car","Juranovic","Brozovic","Kovacic","Modric","Kramaric","Perisic","Vlasic","Budimir","Ivanusec","Pasalic","Livaja","Sosa"],
+  "Switzerland": ["Sommer","Mvogo","Schär","Akanji","Rodriguez","Widmer","Xhaka","Freuler","Sow","Shaqiri","Embolo","Seferovic","Vargas","Okafor","Rieder","Stergiou","Aebischer"],
+  "Algeria":     ["Mandrea","Mahrez","Bennacer","Bensebaini","Slimani","Belaïli","Aouar","Mezdek","Zerrouki","Brahimi","Atal","Bounedjah","Ghoulam","Benrahma","Amoura","Zerrouki"],
+  "Australia":   ["Ryan","Flore","Rowles","Souttar","Atkinson","Behich","Degenek","Mooy","Irvine","McGree","Hrustic","Leckie","Maclaren","Duke","Goodwin","Metcalfe","Bos"],
+  "Egypt":       ["El-Shenawy","Salah","Elmohamady","Hegazi","Hamdi","Trezeguet","Elneny","Ramadan","Ashour","Marmoush","Zizo","Mostafa Mohamed","Sobhi"],
+  "Argentina":   ["Martínez","Rulli","Musso","Molina","Montiel","Otamendi","Lisandro Martínez","Acuña","Tagliafico","De Paul","Mac Allister","Fernández","Paredes","Palacios","Messi","Di María","Dybala","Lautaro Martínez","Álvarez","Correa","Lo Celso"],
+  "Cape Verde":  ["Tavares","Andrade","Bebé","Ryan Mendes","Garry Rodrigues","Jamiro Monteiro","Stopira","Cláudio Winck","Kennedy Boateng","Jovane Cabral","Willy Semedo","Julio Tavares"],
+  "Colombia":    ["Vargas","Arias","Mina","Sánchez","Mojica","Castilla","Lerma","Barrios","James","Cuadrado","Díaz","Córdoba","Borré","Morelos","Juanfer Quintero","Cuesta","Lucumí"],
+  "Ghana":       ["Ati-Zigi","Salisu","Amartey","Djiku","Mensah","Ayew","Partey","Samed","Kudus","Thomas","Sulemana","Osman","Bansa","Williams","Fatawu","Abdul Fatawu"],
+  "Canada":      ["Borjan","Johnston","Miller","Vitória","Cornelius","Davies","Eustáquio","Buchanan","David","Larin","Adekugbe","Hoilett","Millar","Cavallini","Osorio","Kaye"],
+  "Morocco":     ["Bono","Bounou","Hakimi","Mazraoui","Saïss","Aguerd","Amrabat","Ounahi","Ziyech","En-Nesyri","Sabiri","Boufal","Cheddira","Aboukhlal","Dari","El Yamiq","Attiyat Allah"],
+};
+
+function getSquad(m){
+  const h=SQUADS[m.home]||[];
+  const a=SQUADS[m.away]||[];
+  return [...new Set([...h,...a])].sort();
+}
 const C = {card:"#0b1f38",dark:"#071525",border:"#1a3050",green:"#00bb44",dkGreen:"#007730",gold:"#FFD700",muted:"#5a80a8",text:"#e8f0fe",sub:"#b0c8e8",red:"#ff4444"};
 
 const API_KEY="$2a$10$KkmKljANyxbRKdGPHVEjOegAeWIzA4IhJJlrT1akBVNysLvVhK8U2";
@@ -378,14 +419,15 @@ function renderMatchCard(m,players_){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:700;font-size:14px">${esc(name)}</span>${res&&!pred?`<span style="font-size:11px;color:${C.muted}">⏭️ Skipped — 0 pts</span>`:actRes?`<span style="font-size:13px;font-weight:900;color:${pC}">${actRes.total>0?`+${actRes.total} pts`:"0 pts"}</span>`:`<span style="font-size:11px;color:${C.muted}">${locked?"🔒 Locked":"awaiting result"}</span>`}</div>
         ${locked?`<div style="font-size:10px;color:#ff8866;margin-bottom:6px">${S.results[m.id]?"🔒 Match completed — predictions locked":"🔒 Match started — predictions locked"}</div>`:""}
         <div style="display:flex;gap:8px">
-          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">Score prediction</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${pred?C.text:C.muted};font-size:13px">${pred||"—"}</div>`:`<input value="${esc(pred)}" placeholder="e.g. 2-1 (optional)" oninput="setVote('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${pred&&!ok?"#ff6644":C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>${pred&&!ok?`<div style="font-size:10px;color:#ff8866;margin-top:3px">Use format: 2-1</div>`:""}`}</div>
-          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">⭐ First scorer</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${bp?C.text:C.muted};font-size:13px">${bp||"—"}</div>`:`<input value="${esc(bp)}" placeholder="Name" oninput="setBonus('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>`}</div>
+          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">Score prediction</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${pred?C.text:C.muted};font-size:13px">${pred||"—"}</div>`:`<input id="score-${m.id}-${pi}" value="${esc(pred)}" placeholder="e.g. 2-1" oninput="handleScoreInput('${m.id}',${pi},this)" onblur="validateScoreBlur('${m.id}',${pi},this)" style="padding:10px 12px;background:${C.dark};border:1px solid ${pred&&!ok?"#ff6644":C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>${pred&&!ok?`<div style="font-size:10px;color:#ff8866;margin-top:3px">⚠️ Use format: 2-1</div>`:""}`}</div>
+          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">⭐ First scorer</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${bp?C.text:C.muted};font-size:13px">${bp||"—"}</div>`:`<input value="${esc(bp)}" placeholder="Type to search..." list="squad-${m.id}" oninput="setBonus('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>`}</div>
         </div>
         ${isDraw&&!locked?`<div style="margin-top:8px"><div style="font-size:10px;color:${C.gold};font-weight:700;margin-bottom:5px">🥅 Penalty shootout winner? (+2pts)</div><div style="display:flex;gap:6px"><button onclick="setSoVote('${m.id}',${pi},'h')" style="flex:1;padding:8px 0;border-radius:9px;border:${soVote==='h'?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${soVote==='h'?C.green:C.dark};color:${soVote==='h'?"#fff":C.muted};font-size:12px;font-weight:700">${m.hf} ${esc(m.home)}</button><button onclick="setSoVote('${m.id}',${pi},'a')" style="flex:1;padding:8px 0;border-radius:9px;border:${soVote==='a'?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${soVote==='a'?C.green:C.dark};color:${soVote==='a'?"#fff":C.muted};font-size:12px;font-weight:700">${m.af} ${esc(m.away)}</button></div></div>`:""}
         ${isDraw&&locked&&soVote?`<div style="margin-top:6px;font-size:11px;color:${C.muted}">🥅 Shootout pick: ${soVote==="h"?m.hf+" "+esc(m.home):m.af+" "+esc(m.away)}</div>`:""}
         ${actRes&&pred?`<div style="font-size:11px;color:${pC};font-weight:600;margin-top:6px">${actRes.exact?"🎯 Exact score!":""}${actRes.winner?"✅ Correct winner":""}${actRes.draw?"🤝 Correct draw":""}${actRes.soCorrect?" + 🥅 Shootout!":""}${actRes.bonus?" + ⭐ Bonus scorer!":""}${actRes.total===0&&res?"❌ No points":""}</div>`:""}
       </div>`;
     }).join("")}
+    <datalist id="squad-${m.id}">${getSquad(m).map(p=>`<option value="${esc(p)}">`).join("")}</datalist>
     ${MATCHES.some(m=>S.results[m.id])?`<button onclick="setView('board')" style="width:100%;margin-top:8px;padding:13px 0;background:linear-gradient(135deg,${C.green},${C.dkGreen});border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800">🏆 View leaderboard →</button>`:""}`;
 }
 
@@ -429,6 +471,21 @@ function debouncedRender(){clearTimeout(renderTimer);renderTimer=setTimeout(rend
 
 function setPlayer(i,v){S.players[i]=v;sv();ping();}
 function addPlayer(){S.players.push("");sv();render();}
+function handleScoreInput(mid,pi,el){
+  const v=el.value;
+  const valid=!v||!!parseScore(v);
+  el.style.borderColor=valid?C.border:"#ff6644";
+  if(valid){if(!S.votes[mid])S.votes[mid]={};S.votes[mid][pi]=v;sv();ping();}
+}
+function validateScoreBlur(mid,pi,el){
+  const v=el.value.trim();
+  if(v&&!parseScore(v)){
+    el.style.borderColor="#ff6644";
+    el.value=(S.votes[mid]||{})[pi]||"";
+    el.style.borderColor=el.value?"":"";
+    alert("Invalid score format. Please use format like 2-1 (home-away).");
+  }
+}
 function setVote(mid,pi,v){if(!S.votes[mid])S.votes[mid]={};S.votes[mid][pi]=v;sv();ping();}
 function setBonus(mid,pi,v){if(!S.bonus[mid])S.bonus[mid]={};S.bonus[mid][pi]=v;sv();ping();}
 function setSoVote(mid,pi,v){if(!S.soVotes[mid])S.soVotes[mid]={};S.soVotes[mid][pi]=v;sv();ping();render();}
