@@ -149,18 +149,32 @@ const S = {
   view:      "votes",
 };
 
-let cloudSaveTimer;
-function sv(){
-  const data={players:S.players,votes:S.votes,results:S.results,scorers:S.scorers,shootouts:S.shootouts,soVotes:S.soVotes,bonus:S.bonus};
+let pendingCloudSave=false;
+function saveLocal(){
   lsv("gm-players",S.players);lsv("gm-votes",S.votes);lsv("gm-results",S.results);
   lsv("gm-scorers",S.scorers);lsv("gm-shootouts",S.shootouts);lsv("gm-sovotes",S.soVotes);lsv("gm-bonus",S.bonus);
-  clearTimeout(cloudSaveTimer);
-  cloudSaveTimer=setTimeout(()=>{
-    fetch(BIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":API_KEY},body:JSON.stringify(data)})
-      .then(r=>r.ok?toast("✅ Saved to cloud","saved"):toast("❌ Save failed","error"))
-      .catch(()=>toast("❌ No connection","error"));
-  },800);
 }
+function pushCloud(silent){
+  const data={players:S.players,votes:S.votes,results:S.results,scorers:S.scorers,shootouts:S.shootouts,soVotes:S.soVotes,bonus:S.bonus};
+  pendingCloudSave=false;
+  fetch(BIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":API_KEY},body:JSON.stringify(data)})
+    .then(r=>{if(!silent)r.ok?toast("✅ Saved to cloud","saved"):toast("❌ Save failed","error");})
+    .catch(()=>{if(!silent)toast("❌ No connection","error");});
+}
+function sv(cloudNow){
+  saveLocal();
+  pendingCloudSave=true;
+  if(cloudNow){pushCloud();}else{toast("💾 Saved locally","syncing",1500);}
+}
+// Push on page exit
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&pendingCloudSave)pushCloud(true);});
+window.addEventListener("beforeunload",()=>{if(pendingCloudSave)pushCloud(true);});
+// Push when match starts (check every minute)
+setInterval(()=>{
+  if(!pendingCloudSave)return;
+  const started=MATCHES.filter(m=>matchStarted(m)&&!S.results[m.id]);
+  if(started.length)pushCloud(true);
+},60000);
 
 function applyCloud(d){
   if(!d)return;
@@ -183,9 +197,8 @@ async function syncCloud(){
   }catch(e){}
 }
 
-// Load from cloud on startup, then poll every 30s
+// Load from cloud once on startup only
 syncCloud();
-setInterval(syncCloud,30000);
 
 const GM_PIN="6963";
 let isGM=false;
@@ -489,9 +502,9 @@ function validateScoreBlur(mid,pi,el){
 function setVote(mid,pi,v){if(!S.votes[mid])S.votes[mid]={};S.votes[mid][pi]=v;sv();ping();}
 function setBonus(mid,pi,v){if(!S.bonus[mid])S.bonus[mid]={};S.bonus[mid][pi]=v;sv();ping();}
 function setSoVote(mid,pi,v){if(!S.soVotes[mid])S.soVotes[mid]={};S.soVotes[mid][pi]=v;sv();ping();render();}
-function setResult(mid,v){S.results[mid]=v;sv();ping();debouncedRender();}
-function setScorer(mid,v){S.scorers[mid]=v;sv();ping();debouncedRender();}
-function setShootout(mid,v){S.shootouts[mid]=v;sv();ping();render();}
+function setResult(mid,v){S.results[mid]=v;sv(true);ping();debouncedRender();}
+function setScorer(mid,v){S.scorers[mid]=v;sv(true);ping();debouncedRender();}
+function setShootout(mid,v){S.shootouts[mid]=v;sv(true);ping();render();}
 
 render();
 </script>
