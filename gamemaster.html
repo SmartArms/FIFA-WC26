@@ -20,11 +20,16 @@
     .hidden{display:none!important}
     ::-webkit-scrollbar{width:4px;height:4px}
     ::-webkit-scrollbar-thumb{background:#1a3050;border-radius:4px}
+    #scorer-dropdown{position:fixed;background:#0b1f38;border:1px solid #1a3050;border-radius:10px;z-index:5000;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.6);display:none}
+    #scorer-dropdown div{padding:10px 14px;font-size:13px;color:#e8f0fe;border-bottom:1px solid #1a3050}
+    #scorer-dropdown div:last-child{border-bottom:none}
+    #scorer-dropdown div:active{background:#1a3050}
   </style>
 </head>
 <body>
 
 <div class="toast" id="toast"></div>
+<div id="scorer-dropdown"></div>
 
 <div class="modal hidden" id="modal-help">
   <div class="modal-box">
@@ -217,6 +222,35 @@ function gmLogin(){
   else if(pin!==null){alert("❌ Wrong PIN");}
 }
 function gmGuard(fn){return isGM?fn():gmLogin();}
+
+let _ddSquad=[],_ddMid="",_ddPi=0;
+const _dd=()=>document.getElementById("scorer-dropdown");
+function showScorerDropdown(el,mid,pi){
+  _ddMid=mid;_ddPi=pi;
+  _ddSquad=getSquad(MATCHES.find(m=>m.id===mid)||{home:"",away:""});
+  filterScorerDropdown(el);
+  el.addEventListener("input",()=>filterScorerDropdown(el),{once:false});
+}
+function filterScorerDropdown(el){
+  const q=(el.value||"").toLowerCase().trim();
+  const matches=_ddSquad.filter(p=>!q||p.toLowerCase().includes(q)).slice(0,8);
+  const dd=_dd();
+  if(!matches.length){dd.style.display="none";return;}
+  const rect=el.getBoundingClientRect();
+  dd.style.display="block";
+  dd.style.left=rect.left+"px";
+  dd.style.top=(rect.bottom+4)+"px";
+  dd.style.width=rect.width+"px";
+  dd.innerHTML=matches.map(p=>`<div onmousedown="pickScorer('${p.replace(/'/g,"\\'")}','${_ddMid}',${_ddPi})"ontouchstart="pickScorer('${p.replace(/'/g,"\\'")}','${_ddMid}',${_ddPi})">${p}</div>`).join("");
+}
+function pickScorer(name,mid,pi){
+  setBonus(mid,pi,name);
+  const inputs=document.querySelectorAll(`input[data-bonus="${mid}-${pi}"]`);
+  inputs.forEach(el=>el.value=name);
+  _dd().style.display="none";
+}
+function hideScorerDropdown(){setTimeout(()=>{_dd().style.display="none";},150);}
+document.addEventListener("scroll",()=>{_dd().style.display="none";},{passive:true});
 
 function matchStarted(m){
   if(S.results[m.id])return true;
@@ -442,15 +476,14 @@ function renderMatchCard(m,players_){
         ${locked?`<div style="font-size:10px;color:#ff8866;margin-bottom:6px">${S.results[m.id]?"🔒 Match completed — predictions locked":"🔒 Match started — predictions locked"}</div>`:""}
         <div style="display:flex;gap:8px">
           <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">Score prediction</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${pred?C.text:C.muted};font-size:13px">${pred||"—"}</div>`:`<input id="score-${m.id}-${pi}" value="${esc(pred)}" placeholder="e.g. 2-1" oninput="handleScoreInput('${m.id}',${pi},this)" onblur="validateScoreBlur('${m.id}',${pi},this)" style="padding:10px 12px;background:${C.dark};border:1px solid ${pred&&!ok?"#ff6644":C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>${pred&&!ok?`<div style="font-size:10px;color:#ff8866;margin-top:3px">⚠️ Use format: 2-1</div>`:""}`}</div>
-          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">⭐ First scorer</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${bp?C.text:C.muted};font-size:13px">${bp||"—"}</div>`:`<input value="${esc(bp)}" placeholder="Type to search..." list="squad-${m.id}" oninput="setBonus('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>`}</div>
+          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">⭐ First scorer</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${bp?C.text:C.muted};font-size:13px">${bp||"—"}</div>`:`<input value="${esc(bp)}" placeholder="Tap to search..." data-bonus="${m.id}-${pi}" onfocus="showScorerDropdown(this,'${m.id}',${pi})" oninput="setBonus('${m.id}',${pi},this.value)" onblur="hideScorerDropdown()" style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>`}</div>
         </div>
         ${isDraw&&!locked?`<div style="margin-top:8px"><div style="font-size:10px;color:${C.gold};font-weight:700;margin-bottom:5px">🥅 Penalty shootout winner? (+2pts)</div><div style="display:flex;gap:6px"><button onclick="setSoVote('${m.id}',${pi},'h')" style="flex:1;padding:8px 0;border-radius:9px;border:${soVote==='h'?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${soVote==='h'?C.green:C.dark};color:${soVote==='h'?"#fff":C.muted};font-size:12px;font-weight:700">${m.hf} ${esc(m.home)}</button><button onclick="setSoVote('${m.id}',${pi},'a')" style="flex:1;padding:8px 0;border-radius:9px;border:${soVote==='a'?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${soVote==='a'?C.green:C.dark};color:${soVote==='a'?"#fff":C.muted};font-size:12px;font-weight:700">${m.af} ${esc(m.away)}</button></div></div>`:""}
         ${isDraw&&locked&&soVote?`<div style="margin-top:6px;font-size:11px;color:${C.muted}">🥅 Shootout pick: ${soVote==="h"?m.hf+" "+esc(m.home):m.af+" "+esc(m.away)}</div>`:""}
         ${actRes&&pred?`<div style="font-size:11px;color:${pC};font-weight:600;margin-top:6px">${actRes.exact?"🎯 Exact score!":""}${actRes.winner?"✅ Correct winner":""}${actRes.draw?"🤝 Correct draw":""}${actRes.soCorrect?" + 🥅 Shootout!":""}${actRes.bonus?" + ⭐ Bonus scorer!":""}${actRes.total===0&&res?"❌ No points":""}</div>`:""}
       </div>`;
     }).join("")}
-    <datalist id="squad-${m.id}">${getSquad(m).map(p=>`<option value="${esc(p)}">`).join("")}</datalist>
-    ${MATCHES.some(m=>S.results[m.id])?`<button onclick="setView('board')" style="width:100%;margin-top:8px;padding:13px 0;background:linear-gradient(135deg,${C.green},${C.dkGreen});border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800">🏆 View leaderboard →</button>`:""}`;
+${MATCHES.some(m=>S.results[m.id])?`<button onclick="setView('board')" style="width:100%;margin-top:8px;padding:13px 0;background:linear-gradient(135deg,${C.green},${C.dkGreen});border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800">🏆 View leaderboard →</button>`:""}`;
 }
 
 function renderBoard(lb,hasResults){
