@@ -10,8 +10,11 @@
     input,button,textarea{font-family:inherit}
     button{cursor:pointer}
     input:focus,textarea:focus{outline:none}
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#007730;color:#fff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:20px;z-index:9999;pointer-events:none;display:none}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);color:#fff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:20px;z-index:9999;pointer-events:none;display:none;transition:background 0.3s}
     .toast.show{display:block}
+    .toast.syncing{background:#1a5080}
+    .toast.saved{background:#007730}
+    .toast.error{background:#cc3333}
     .modal{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:200;display:flex;align-items:flex-end}
     .modal-box{width:100%;background:#0b1f38;border-radius:20px 20px 0 0;border:1px solid #1a3050;padding:20px 16px 40px;max-height:92vh;overflow-y:auto;box-sizing:border-box}
     .hidden{display:none!important}
@@ -21,7 +24,7 @@
 </head>
 <body>
 
-<div class="toast" id="toast">💾 Saved</div>
+<div class="toast" id="toast"></div>
 
 <div class="modal hidden" id="modal-help">
   <div class="modal-box">
@@ -112,7 +115,9 @@ function sv(){
   lsv("gm-scorers",S.scorers);lsv("gm-shootouts",S.shootouts);lsv("gm-sovotes",S.soVotes);lsv("gm-bonus",S.bonus);
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer=setTimeout(()=>{
-    fetch(BIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":API_KEY},body:JSON.stringify(data)}).catch(()=>{});
+    fetch(BIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Access-Key":API_KEY},body:JSON.stringify(data)})
+      .then(r=>r.ok?toast("✅ Saved to cloud","saved"):toast("❌ Save failed","error"))
+      .catch(()=>toast("❌ No connection","error"));
   },800);
 }
 
@@ -204,7 +209,14 @@ function rankLbl(lb,i){const r=rankIdx(lb,i);return MEDAL[r]||"#"+(r+1);}
 function rankClr(lb,i){const r=rankIdx(lb,i);return r===0?C.gold:r===1?"#c0c0c0":r===2?"#cd7f32":C.text;}
 
 let toastT;
-function ping(){clearTimeout(toastT);const t=document.getElementById("toast");t.classList.add("show");toastT=setTimeout(()=>t.classList.remove("show"),1500);}
+function toast(msg,type,dur=2000){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.className="toast show "+type;
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove("show"),dur);
+}
+function ping(){toast("☁️ Syncing...","syncing",2500);}
 function openModal(id){document.getElementById(id).classList.remove("hidden");}
 function closeModal(id){document.getElementById(id).classList.add("hidden");}
 
