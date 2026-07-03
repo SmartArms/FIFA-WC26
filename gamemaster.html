@@ -49,7 +49,7 @@
 
 <script>
 const MATCHES = [
-  {id:"m1",  day:"Mon Jun 29", home:"Brazil",      hf:"🇧🇷", away:"Japan",       af:"🇯🇵", time:"12:00 PM CDT", live:true},
+  {id:"m1",  day:"Mon Jun 29", home:"Brazil",      hf:"🇧🇷", away:"Japan",       af:"🇯🇵", time:"12:00 PM CDT"},
   {id:"m2",  day:"Mon Jun 29", home:"Germany",     hf:"🇩🇪", away:"Paraguay",    af:"🇵🇾", time:"3:30 PM CDT"},
   {id:"m3",  day:"Mon Jun 29", home:"Netherlands", hf:"🇳🇱", away:"Morocco",     af:"🇲🇦", time:"8:00 PM CDT"},
   {id:"m4",  day:"Tue Jun 30", home:"Ivory Coast", hf:"🇨🇮", away:"Norway",      af:"🇳🇴", time:"12:00 PM CDT"},
@@ -365,7 +365,7 @@ function renderMatchCard(m,players_){
       const locked=matchStarted(m)&&!isGM;
       return`<div style="background:${C.card};border:1px solid ${C.border};border-radius:12px;padding:11px 13px;margin-bottom:8px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:700;font-size:14px">${esc(name)}</span>${res&&!pred?`<span style="font-size:11px;color:${C.muted}">⏭️ Skipped — 0 pts</span>`:actRes?`<span style="font-size:13px;font-weight:900;color:${pC}">${actRes.total>0?`+${actRes.total} pts`:"0 pts"}</span>`:`<span style="font-size:11px;color:${C.muted}">${locked?"🔒 Locked":"awaiting result"}</span>`}</div>
-        ${locked?`<div style="font-size:10px;color:#ff8866;margin-bottom:6px">🔒 Match started — predictions locked</div>`:""}
+        ${locked?`<div style="font-size:10px;color:#ff8866;margin-bottom:6px">${S.results[m.id]?"🔒 Match completed — predictions locked":"🔒 Match started — predictions locked"}</div>`:""}
         <div style="display:flex;gap:8px">
           <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">Score prediction</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${pred?C.text:C.muted};font-size:13px">${pred||"—"}</div>`:`<input value="${esc(pred)}" placeholder="e.g. 2-1 (optional)" oninput="setVote('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${pred&&!ok?"#ff6644":C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>${pred&&!ok?`<div style="font-size:10px;color:#ff8866;margin-top:3px">Use format: 2-1</div>`:""}`}</div>
           <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">⭐ First scorer</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${bp?C.text:C.muted};font-size:13px">${bp||"—"}</div>`:`<input value="${esc(bp)}" placeholder="Name" oninput="setBonus('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>`}</div>
