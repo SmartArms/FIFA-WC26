@@ -150,6 +150,20 @@ function gmLogin(){
 }
 function gmGuard(fn){return isGM?fn():gmLogin();}
 
+function matchStarted(m){
+  if(!m.time||m.time==="TBD")return false;
+  const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  const dp=m.day.split(" ");
+  const mon=months[dp[1]],day=parseInt(dp[2]);
+  const tp=m.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if(!tp)return false;
+  let hr=parseInt(tp[1]),min=parseInt(tp[2]);
+  if(tp[3].toUpperCase()==="PM"&&hr!==12)hr+=12;
+  if(tp[3].toUpperCase()==="AM"&&hr===12)hr=0;
+  const offset=m.time.includes("CST")?6:5; // CST=UTC-6, CDT=UTC-5
+  return Date.now()>=Date.UTC(2026,mon,day,hr+offset,min);
+}
+
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
 function parseScore(s){
@@ -347,13 +361,16 @@ function renderMatchCard(m,players_){
       const actRes=res?calcPts(pred,res,so,bp,scorer,soVote):null;
       const pC=!actRes?C.muted:actRes.total>=5?C.gold:actRes.total>0?C.green:C.red;
       const ok=!pred||!!parseScore(pred);
+      const locked=matchStarted(m)&&!isGM;
       return`<div style="background:${C.card};border:1px solid ${C.border};border-radius:12px;padding:11px 13px;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:700;font-size:14px">${esc(name)}</span>${res&&!pred?`<span style="font-size:11px;color:${C.muted}">⏭️ Skipped — 0 pts</span>`:actRes?`<span style="font-size:13px;font-weight:900;color:${pC}">${actRes.total>0?`+${actRes.total} pts`:"0 pts"}</span>`:`<span style="font-size:11px;color:${C.muted}">awaiting result</span>`}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:700;font-size:14px">${esc(name)}</span>${res&&!pred?`<span style="font-size:11px;color:${C.muted}">⏭️ Skipped — 0 pts</span>`:actRes?`<span style="font-size:13px;font-weight:900;color:${pC}">${actRes.total>0?`+${actRes.total} pts`:"0 pts"}</span>`:`<span style="font-size:11px;color:${C.muted}">${locked?"🔒 Locked":"awaiting result"}</span>`}</div>
+        ${locked?`<div style="font-size:10px;color:#ff8866;margin-bottom:6px">🔒 Match started — predictions locked</div>`:""}
         <div style="display:flex;gap:8px">
-          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">Score prediction</div><input value="${esc(pred)}" placeholder="e.g. 2-1 (optional)" oninput="setVote('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${pred&&!ok?"#ff6644":C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>${pred&&!ok?`<div style="font-size:10px;color:#ff8866;margin-top:3px">Use format: 2-1</div>`:""}</div>
-          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">⭐ First scorer</div><input value="${esc(bp)}" placeholder="Name" oninput="setBonus('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/></div>
+          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">Score prediction</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${pred?C.text:C.muted};font-size:13px">${pred||"—"}</div>`:`<input value="${esc(pred)}" placeholder="e.g. 2-1 (optional)" oninput="setVote('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${pred&&!ok?"#ff6644":C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>${pred&&!ok?`<div style="font-size:10px;color:#ff8866;margin-top:3px">Use format: 2-1</div>`:""}`}</div>
+          <div style="flex:1"><div style="font-size:10px;color:${C.muted};margin-bottom:4px">⭐ First scorer</div>${locked?`<div style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${bp?C.text:C.muted};font-size:13px">${bp||"—"}</div>`:`<input value="${esc(bp)}" placeholder="Name" oninput="setBonus('${m.id}',${pi},this.value)" style="padding:10px 12px;background:${C.dark};border:1px solid ${C.border};border-radius:9px;color:${C.text};font-size:13px;width:100%"/>`}</div>
         </div>
-        ${isDraw?`<div style="margin-top:8px"><div style="font-size:10px;color:${C.gold};font-weight:700;margin-bottom:5px">🥅 Penalty shootout winner? (+2pts)</div><div style="display:flex;gap:6px"><button onclick="setSoVote('${m.id}',${pi},'h')" style="flex:1;padding:8px 0;border-radius:9px;border:${soVote==='h'?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${soVote==='h'?C.green:C.dark};color:${soVote==='h'?"#fff":C.muted};font-size:12px;font-weight:700">${m.hf} ${esc(m.home)}</button><button onclick="setSoVote('${m.id}',${pi},'a')" style="flex:1;padding:8px 0;border-radius:9px;border:${soVote==='a'?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${soVote==='a'?C.green:C.dark};color:${soVote==='a'?"#fff":C.muted};font-size:12px;font-weight:700">${m.af} ${esc(m.away)}</button></div></div>`:""}
+        ${isDraw&&!locked?`<div style="margin-top:8px"><div style="font-size:10px;color:${C.gold};font-weight:700;margin-bottom:5px">🥅 Penalty shootout winner? (+2pts)</div><div style="display:flex;gap:6px"><button onclick="setSoVote('${m.id}',${pi},'h')" style="flex:1;padding:8px 0;border-radius:9px;border:${soVote==='h'?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${soVote==='h'?C.green:C.dark};color:${soVote==='h'?"#fff":C.muted};font-size:12px;font-weight:700">${m.hf} ${esc(m.home)}</button><button onclick="setSoVote('${m.id}',${pi},'a')" style="flex:1;padding:8px 0;border-radius:9px;border:${soVote==='a'?`2px solid ${C.green}`:`1px solid ${C.border}`};background:${soVote==='a'?C.green:C.dark};color:${soVote==='a'?"#fff":C.muted};font-size:12px;font-weight:700">${m.af} ${esc(m.away)}</button></div></div>`:""}
+        ${isDraw&&locked&&soVote?`<div style="margin-top:6px;font-size:11px;color:${C.muted}">🥅 Shootout pick: ${soVote==="h"?m.hf+" "+esc(m.home):m.af+" "+esc(m.away)}</div>`:""}
         ${actRes&&pred?`<div style="font-size:11px;color:${pC};font-weight:600;margin-top:6px">${actRes.exact?"🎯 Exact score!":""}${actRes.winner?"✅ Correct winner":""}${actRes.draw?"🤝 Correct draw":""}${actRes.soCorrect?" + 🥅 Shootout!":""}${actRes.bonus?" + ⭐ Bonus scorer!":""}${actRes.total===0&&res?"❌ No points":""}</div>`:""}
       </div>`;
     }).join("")}
