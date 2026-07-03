@@ -392,32 +392,23 @@ function showFullscreen(){
   el.classList.remove("hidden");
 }
 
-function renderIdentityScreen(){
-  const players=S.players.filter(p=>p.trim());
+function renderNoAccessScreen(){
   document.getElementById("app").innerHTML=`
     <div style="background:linear-gradient(180deg,#006622,#004416);padding:16px 20px 12px;text-align:center;border-bottom:3px solid ${C.gold}">
       <div style="font-size:22px">🏆</div>
       <div style="font-size:16px;font-weight:900;color:#fff;margin-top:2px">FIFA WC 2026</div>
       <div style="font-size:9px;color:#7fc89a;letter-spacing:2.5px;text-transform:uppercase;margin-top:1px">Game Master</div>
     </div>
-    <div style="padding:32px 20px;text-align:center">
-      <div style="font-size:32px;margin-bottom:12px">👋</div>
-      <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:6px">Who are you?</div>
-      <div style="font-size:13px;color:${C.muted};margin-bottom:28px">Select your name to enter predictions</div>
-      <div style="display:flex;flex-direction:column;gap:10px;max-width:300px;margin:0 auto">
-        ${players.map((p,i)=>`<button onclick="selectIdentity(${S.players.indexOf(p)})" style="padding:14px 0;background:${C.card};border:1px solid ${C.border};border-radius:12px;color:#fff;font-size:16px;font-weight:700">${esc(p)}</button>`).join("")}
-      </div>
+    <div style="padding:48px 24px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">🔒</div>
+      <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:10px">Access Denied</div>
+      <div style="font-size:13px;color:${C.muted};line-height:1.6">Please use your personal link sent via WhatsApp to access the app.</div>
+      <div style="margin-top:28px"><button onclick="gmLogin()" style="padding:12px 24px;background:${C.card};border:1px solid ${C.border};border-radius:10px;color:${C.muted};font-size:13px">🔐 GM Login</button></div>
     </div>`;
 }
 
-function selectIdentity(idx){
-  myIdx=idx;
-  lsv("gm-myidx",idx);
-  render();
-}
-
 function render(){
-  if(myIdx===null&&!isGM){renderIdentityScreen();return;}
+  if(myIdx===null&&!isGM){renderNoAccessScreen();return;}
   const dayMatches=MATCHES.filter(m=>m.day===S.day);
   const match=dayMatches.find(m=>m.id===S.match)||dayMatches[0];
   const lb=getLB();
@@ -436,10 +427,7 @@ function render(){
             ?`<button onclick="isGM=false;render()" style="padding:5px 10px;background:rgba(0,187,68,0.15);border:1px solid ${C.green};border-radius:8px;color:${C.green};font-size:11px;font-weight:700">🔓 GM</button>`
             :`<button onclick="gmLogin()" style="padding:5px 10px;background:rgba(0,0,0,0.3);border:1px solid ${C.border};border-radius:8px;color:${C.muted};font-size:11px;font-weight:700">🔐</button>`}
           ${!isGM&&myIdx!==null
-            ?`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
-                <div style="font-size:11px;color:#7fc89a;font-weight:700">👤 ${esc(S.players[myIdx]||"")}</div>
-                <button onclick="myIdx=null;lsv('gm-myidx',null);render()" style="font-size:9px;color:${C.muted};background:none;border:none;text-decoration:underline;padding:0">switch</button>
-              </div>`
+            ?`<div style="font-size:11px;color:#7fc89a;font-weight:700">👤 ${esc(S.players[myIdx]||"")}</div>`
             :""}
         </div>
       </div>
