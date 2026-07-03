@@ -491,12 +491,7 @@ function renderMatchCard(m,players_){
   const so=S.shootouts[m.id]||"";
   const a=parseScore(res);
   const isDraw=a&&a.h===a.a;
-  const _dbgStarted=matchStarted(m);
-  const _dbgNow=new Date().toISOString();
   return`
-    <div style="background:#1a0a00;border:1px solid #ff8800;border-radius:8px;padding:7px 12px;margin-bottom:8px;font-size:10px;color:#ffcc88;font-family:monospace">
-      🔧 DEBUG — Now: ${_dbgNow} | Match: ${m.id} | Started: ${_dbgStarted} | HasResult: ${!!res}
-    </div>
     <div style="background:${m.live?"#1a0808":C.card};border:1px solid ${m.live?C.red:C.border};border-radius:14px;overflow:hidden;margin-bottom:12px">
       <div style="padding:11px 13px;border-bottom:1px solid ${C.border};display:flex;justify-content:space-between;align-items:center">
         <div><div style="font-size:14px;font-weight:800">${m.hf} ${esc(m.home)} <span style="color:${C.muted};font-weight:400">vs</span> ${m.af} ${esc(m.away)}</div><div style="font-size:11px;color:${C.muted};margin-top:2px">⏰ ${m.time}${m.stage?" · "+m.stage:""}</div></div>
